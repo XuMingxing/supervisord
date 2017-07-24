@@ -7,8 +7,20 @@
 
 import sys
 import os
-import sample1
-
+import sendmsg
+import ConfigParser
+config=ConfigParser.ConfigParser()
+global process
+def publish_msg(status):
+    config.read("/home/pi/snitch-sniffer/phonenumber.cfg")
+    global process
+    if process == 'while11':
+        phonenumber=config.get("phonenumber","while11")
+        sendmsg.send_msg(phonenumber,'pro:%s'%process,"state",str(status))
+    if process == 'while123':
+        phonenumber=config.get("phonenumber","while123")
+        sendmsg.send_msg(phonenumber,'pro:%s'%process,"state",str(status))
+    return 
 def write_stdout(s):
     sys.stdout.write(s)
     sys.stdout.flush()
@@ -49,17 +61,21 @@ def main():
             pheaders, pdata = parseData(data)
             from_state = pheaders['from_state']
             process_name = pheaders['processname']
+            global process
+            process = process_name
             if headers['eventname'] == 'PROCESS_STATE_EXITED' and\
                 not int(pheaders['expected']):
                 msg = '进程%s(PID: %s)异常退出，请检查进程状态.'\
                     % (process_name, pheaders['pid'])
               #  print(msg)
-                sample1.send_msg("pro:%s","state","exited") 
+               # sendmsg.send_msg('15056978947','pro:%s'%process_name,"state","exited") 
+                publish_msg("existed")
             if headers['eventname'] == 'PROCESS_STATE_FATAL':
                 msg = '进程%s启动失败，请检查进程状态.'\
                     % (process_name)
                # print(msg)
-                sample1.send_msg("pro:%s","state","fatal")
+               # sendmsg.send_msg('15056978947','pro:%s'%process_name,"state","fatal")
+                publish_msg("fatal")
         elif headers['eventname'] == 'PROCESS_LOG_STDERR':
             pheaders, pdata = parseData(data)
             process_name = pheaders['processname']
@@ -67,7 +83,8 @@ def main():
             msg = '进程%s(PID: %s)错误输出，请检查进程状态，错误输出信息: %s.' \
                 % (process_name, pid, pdata)
            # print(msg)
-            sample1.send_msg("pro:%s","log","stderr")
+           # sendmsg.send_msg('15056978947','pro:%s'%process_name,"log","stderr")
+            publish_msg("stderr")
         #echo RESULT
         write_stdout('RESULT 2\nOK') # transition from READY to ACKNOWLEDGED
 

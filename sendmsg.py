@@ -19,9 +19,13 @@ my_topic = my_account.get_topic(topic_name)
 #linename="Tom"
 #devicename="001"
 #message="duanlu"
-def send_msg(linename,devicename,message):
+def send_msg(phone,linename,devicename,message):
     direct_sms_attr1 = DirectSMSInfo(free_sign_name="故指通知", template_code="SMS_51620020", single=False)
-    direct_sms_attr1.add_receiver(receiver="15056978947", params={"linename": str(linename) ,"devicename": str(devicename) ,"message": str(message) })
+    phonenumber=phone.split(',')
+    number=len(phonenumber)
+    while(number!=0):
+        number-=1
+        direct_sms_attr1.add_receiver(receiver=str(phonenumber[number]), params={"linename": str(linename) ,"devicename": str(devicename) ,"message": str(message) })
     #direct_sms.add_receiver(receiver="$phone2", params={"name": "David"})
     #init TopicMessage
     msg_body = "I am test message."
